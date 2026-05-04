@@ -17,7 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { name: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
-    { name: 'Skill Swap', icon: 'swap_horiz', href: '#' },
+    { name: 'Skill Swap', icon: 'swap_horiz', href: '/skill-swap' },
     { name: 'Team Finder', icon: 'group_add', href: '#' },
     { name: 'Projects', icon: 'assignment', href: '#' },
     { name: 'Messages', icon: 'chat_bubble', href: '#' },
@@ -93,8 +93,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </nav>
 
       {/* Main Content Canvas */}
-      <main className="flex-1 md:ml-64 pt-16 md:pt-0 min-h-screen">
-        {children}
+      <main className="flex-1 md:ml-64 pt-16 md:pt-0 min-h-screen flex flex-col">
+        <div className="flex-1">{children}</div>
+        <footer className="mt-auto bg-white dark:bg-slate-900 w-full border-t border-slate-200 dark:border-slate-800 py-8 px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="font-bold text-slate-900 dark:text-white text-sm">SkillBridge</div>
+          <div className="text-xs font-normal text-slate-500 dark:text-slate-400">
+            © 2024 SkillBridge SaaS. All rights reserved.
+          </div>
+          <div className="flex items-center gap-4">
+            <a className="text-xs font-normal text-slate-500 hover:text-indigo-500 hover:underline transition-opacity duration-150" href="#">Privacy Policy</a>
+            <a className="text-xs font-normal text-slate-500 hover:text-indigo-500 hover:underline transition-opacity duration-150" href="#">Terms of Service</a>
+            <a className="text-xs font-normal text-slate-500 hover:text-indigo-500 hover:underline transition-opacity duration-150" href="#">Contact</a>
+            <a className="text-xs font-normal text-slate-500 hover:text-indigo-500 hover:underline transition-opacity duration-150" href="#">API Docs</a>
+          </div>
+        </footer>
       </main>
     </div>
   );
