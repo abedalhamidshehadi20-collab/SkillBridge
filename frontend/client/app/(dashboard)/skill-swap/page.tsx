@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-type Profile = {
+type MatchProfile = {
   id: string;
   first_name: string;
   last_name: string;
@@ -11,16 +11,12 @@ type Profile = {
   avatar_url: string;
   can_teach: string[];
   wants_to_learn: string[];
+  matchScore: number;
+  matchReason?: string;
 };
 
-function SkillSwapCard({
-  profile,
-  matchPercent,
-}: {
-  profile: Profile;
-  matchPercent: number;
-}) {
-  const isHighMatch = matchPercent >= 80;
+function SkillSwapCard({ profile }: { profile: MatchProfile }) {
+  const isHighMatch = profile.matchScore >= 80;
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Anonymous';
 
   return (
@@ -48,6 +44,7 @@ function SkillSwapCard({
               ? 'bg-primary-container/20 border-primary-container/30'
               : 'bg-surface-container border-outline-variant/50'
           }`}
+          title={profile.matchReason || 'Match Score'}
         >
           <span
             className={`material-symbols-outlined text-[14px] ${isHighMatch ? 'text-primary' : 'text-on-surface-variant'}`}
@@ -58,10 +55,18 @@ function SkillSwapCard({
           <span
             className={`font-label-sm text-[12px] font-bold ${isHighMatch ? 'text-primary' : 'text-on-surface-variant'}`}
           >
-            {matchPercent}% Match
+            {profile.matchScore}% Match
           </span>
         </div>
       </div>
+
+      {/* AI Reason (if present) */}
+      {profile.matchReason && (
+        <div className="bg-primary/5 border border-primary/10 rounded-lg p-3 mb-md text-sm font-body-md text-on-surface-variant italic">
+          <span className="material-symbols-outlined text-[16px] text-primary align-middle mr-1">psychiatry</span>
+          {profile.matchReason}
+        </div>
+      )}
 
       {/* Skills Section */}
       <div className="flex-1 flex flex-col gap-md mb-lg">
@@ -113,21 +118,30 @@ function SkillSwapCard({
 
 export default function SkillSwapPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles] = useState<MatchProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
     async function fetchProfiles() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .neq('id', user?.id || ''); // Don't show current user
-        
-      if (data) {
-        setProfiles(data as Profile[]);
+      if (session) {
+        try {
+          const res = await fetch('http://localhost:3001/api/v1/matches/skills', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          });
+          const json = await res.json();
+          if (json.matches) {
+            // Sort by match score descending
+            const sorted = json.matches.sort((a: MatchProfile, b: MatchProfile) => b.matchScore - a.matchScore);
+            setProfiles(sorted);
+          }
+        } catch (err) {
+          console.error('Error fetching matches:', err);
+        }
       }
       setLoading(false);
     }
@@ -174,12 +188,13 @@ export default function SkillSwapPage() {
       {/* Main Grid: Available for Swap */}
       {loading ? (
         <div className="text-center py-xl">
-          <p className="font-body-md text-on-surface-variant">Loading potential matches...</p>
+          <span className="material-symbols-outlined text-[48px] text-primary mb-md block animate-pulse">psychiatry</span>
+          <p className="font-body-md text-on-surface-variant">AI is calculating optimal matches for you...</p>
         </div>
       ) : filteredProfiles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-          {filteredProfiles.map((profile, index) => (
-            <SkillSwapCard key={profile.id} profile={profile} matchPercent={98 - index * 5} />
+          {filteredProfiles.map((profile) => (
+            <SkillSwapCard key={profile.id} profile={profile} />
           ))}
         </div>
       ) : (
