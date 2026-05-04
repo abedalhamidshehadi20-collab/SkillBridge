@@ -1,44 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
-// Mock data – in a later phase this will come from Supabase + AI matching
-const MOCK_SWAPS = [
-  {
-    id: '1',
-    name: 'Elena Rivera',
-    role: 'Senior UX Designer',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBXFEI80xEbcDUuSnxwYtZAOG9svm_vEXDeNRPXMRIR-adxe-xIGUlOnbjmKeitDooqIbG5RvkTndYDO3cQa3rDwwJ5hxfPcGvMpQc240T5dXHi6pKTO0Z6HDFbtsr6fj_yOfeKKHvzpb7YQ6UVfrqBKehcSHo4wcrGx0w3OuG8vr3MWQ1XcZS16QiZDn70mUl-AnbkGDVPZrqdUCCIi26a1gUok-6trTTfyfewmSOy6itQpeBRm-TZ8L3jtf_pFd5bai1bLDfze_Dt',
-    matchPercent: 98,
-    canTeach: ['Figma', 'Prototyping', 'User Research'],
-    wantsToLearn: ['React Native', 'CSS Animations'],
-  },
-  {
-    id: '2',
-    name: 'Marcus Thorne',
-    role: 'Frontend Developer',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB2LPsaQUWOjhM6i5gQyZG4RiNiACdmyjXjrUSI8hxIh3oI9q1VaqzlNR5FvPS0rr1BKrl-6yHbwI28Sk6PL4kDo9997l9XMgzOgOa5uQ-e3Whwh4cJ784sEqLt_f526G4eKaN9-pL98bu28VggbkYDnS-FxMI_2AXWg96kS0RuW--7NI9WxjsI-QbBCTrYYt3VVpic1otQcD4A0SESMpcfksf9RAQDGwJQWnP8X_5pyNfMp_8Oot-V8txUIUd-K3RvDcg9Qc_YJUV8',
-    matchPercent: 92,
-    canTeach: ['Vue.js', 'Tailwind CSS', 'JavaScript'],
-    wantsToLearn: ['UI Design Fundamentals', 'Color Theory'],
-  },
-  {
-    id: '3',
-    name: 'Sarah Lin',
-    role: 'Product Manager',
-    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCWfdMhwMJyY6zJSX5K04PAk33CXpyISAvzsZx9W8eB34E_c09URWfrks-6YiE4uZSRjKcBN74tZCLHJItrsZuskLntDF5aiC_z_GaZ33puNViGqc-s4DDazabnB0iu8I9mAlq7I8f5aQK-BwE8wuYsX2VKzq5dK--mJkZza5S5_lgG5x8LHGMgVGQiRZw9f2h_ITbHhzf4GPFsQFLELDCCkVpq0tnbRpp7ovc6pL0Me09GelLOQGjDY3TPiGXp9k6zHiSoefLwuRh9',
-    matchPercent: 85,
-    canTeach: ['Agile Management', 'Product Strategy'],
-    wantsToLearn: ['Data Analysis', 'SQL Basics'],
-  },
-];
+type Profile = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  avatar_url: string;
+  can_teach: string[];
+  wants_to_learn: string[];
+};
 
 function SkillSwapCard({
-  swap,
+  profile,
+  matchPercent,
 }: {
-  swap: (typeof MOCK_SWAPS)[number];
+  profile: Profile;
+  matchPercent: number;
 }) {
-  const isHighMatch = swap.matchPercent >= 95;
+  const isHighMatch = matchPercent >= 80;
+  const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Anonymous';
 
   return (
     <article className="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0px_10px_25px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col h-full group relative overflow-hidden">
@@ -50,13 +33,13 @@ function SkillSwapCard({
         <div className="flex items-center gap-md">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            alt={`${swap.name} avatar`}
+            alt={`${fullName} avatar`}
             className="w-12 h-12 rounded-full object-cover border-2 border-surface-container-lowest shadow-sm"
-            src={swap.avatar}
+            src={profile.avatar_url || `https://ui-avatars.com/api/?name=${fullName}&background=3525cd&color=fff`}
           />
           <div>
-            <h3 className="font-h3 text-[18px] text-on-surface leading-tight">{swap.name}</h3>
-            <p className="font-body-md text-sm text-on-surface-variant">{swap.role}</p>
+            <h3 className="font-h3 text-[18px] text-on-surface leading-tight">{fullName}</h3>
+            <p className="font-body-md text-sm text-on-surface-variant">{profile.role || 'Member'}</p>
           </div>
         </div>
         <div
@@ -75,7 +58,7 @@ function SkillSwapCard({
           <span
             className={`font-label-sm text-[12px] font-bold ${isHighMatch ? 'text-primary' : 'text-on-surface-variant'}`}
           >
-            {swap.matchPercent}% Match
+            {matchPercent}% Match
           </span>
         </div>
       </div>
@@ -89,14 +72,14 @@ function SkillSwapCard({
             <span className="font-label-sm text-xs uppercase tracking-wider text-outline">Can Teach</span>
           </div>
           <div className="flex flex-wrap gap-xs mt-1">
-            {swap.canTeach.map((skill) => (
+            {profile.can_teach?.length > 0 ? profile.can_teach.map((skill) => (
               <span
                 key={skill}
                 className="bg-surface-container-highest text-on-surface px-3 py-1 rounded-full font-caption text-caption"
               >
                 {skill}
               </span>
-            ))}
+            )) : <span className="text-xs text-outline italic">No skills listed yet</span>}
           </div>
         </div>
 
@@ -107,14 +90,14 @@ function SkillSwapCard({
             <span className="font-label-sm text-xs uppercase tracking-wider text-outline">Wants to Learn</span>
           </div>
           <div className="flex flex-wrap gap-xs mt-1">
-            {swap.wantsToLearn.map((skill) => (
+            {profile.wants_to_learn?.length > 0 ? profile.wants_to_learn.map((skill) => (
               <span
                 key={skill}
                 className="bg-primary-container/10 text-primary px-3 py-1 rounded-full font-caption text-caption font-medium border border-primary/20"
               >
                 {skill}
               </span>
-            ))}
+            )) : <span className="text-xs text-outline italic">No skills listed yet</span>}
           </div>
         </div>
       </div>
@@ -130,14 +113,36 @@ function SkillSwapCard({
 
 export default function SkillSwapPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
-  const filteredSwaps = MOCK_SWAPS.filter(
-    (swap) =>
-      swap.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      swap.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      swap.canTeach.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      swap.wantsToLearn.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  useEffect(() => {
+    async function fetchProfiles() {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('id', user?.id || ''); // Don't show current user
+        
+      if (data) {
+        setProfiles(data as Profile[]);
+      }
+      setLoading(false);
+    }
+    fetchProfiles();
+  }, [supabase]);
+
+  const filteredProfiles = profiles.filter((profile) => {
+    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.toLowerCase();
+    const role = (profile.role || '').toLowerCase();
+    const q = searchQuery.toLowerCase();
+    
+    return fullName.includes(q) || role.includes(q) || 
+      (profile.can_teach || []).some(s => s.toLowerCase().includes(q)) ||
+      (profile.wants_to_learn || []).some(s => s.toLowerCase().includes(q));
+  });
 
   return (
     <div className="flex-1 p-lg md:p-xl max-w-[1400px] w-full mx-auto">
@@ -164,28 +169,17 @@ export default function SkillSwapPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex gap-sm w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-          <button className="whitespace-nowrap flex items-center gap-xs px-md py-sm rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-sm text-label-sm transition-colors">
-            <span className="material-symbols-outlined text-[18px]">tune</span>
-            Filters
-          </button>
-          <div className="h-8 w-px bg-outline-variant self-center mx-xs hidden md:block"></div>
-          <button className="whitespace-nowrap flex items-center gap-xs px-md py-sm rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">
-            Role: Design
-            <span className="material-symbols-outlined text-[16px]">expand_more</span>
-          </button>
-          <button className="whitespace-nowrap flex items-center gap-xs px-md py-sm rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">
-            Level: Intermediate
-            <span className="material-symbols-outlined text-[16px]">expand_more</span>
-          </button>
-        </div>
       </div>
 
       {/* Main Grid: Available for Swap */}
-      {filteredSwaps.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-xl">
+          <p className="font-body-md text-on-surface-variant">Loading potential matches...</p>
+        </div>
+      ) : filteredProfiles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-          {filteredSwaps.map((swap) => (
-            <SkillSwapCard key={swap.id} swap={swap} />
+          {filteredProfiles.map((profile, index) => (
+            <SkillSwapCard key={profile.id} profile={profile} matchPercent={98 - index * 5} />
           ))}
         </div>
       ) : (

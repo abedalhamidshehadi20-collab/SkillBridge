@@ -39,10 +39,18 @@ export default function ProfilePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
+        
+        // Fetch from public.profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
         reset({
-          firstName: user.user_metadata?.first_name || '',
-          lastName: user.user_metadata?.last_name || '',
-          title: user.user_metadata?.title || 'Member',
+          firstName: profile?.first_name || user.user_metadata?.first_name || '',
+          lastName: profile?.last_name || user.user_metadata?.last_name || '',
+          title: profile?.role || user.user_metadata?.title || 'Member',
           location: user.user_metadata?.location || '',
           bio: user.user_metadata?.bio || '',
         });
@@ -50,11 +58,24 @@ export default function ProfilePage() {
       setLoading(false);
     }
     loadProfile();
-  }, [supabase.auth, reset]);
+  }, [supabase, reset]);
 
   const onSubmit = async (data: ProfileForm) => {
     setSaveMessage(null);
-    const { error, data: updatedUser } = await supabase.auth.updateUser({
+    if (!user) return;
+
+    // Update public.profiles
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        first_name: data.firstName,
+        last_name: data.lastName,
+        role: data.title,
+      })
+      .eq('id', user.id);
+
+    // Update auth user metadata
+    const { error: authError, data: updatedUser } = await supabase.auth.updateUser({
       data: {
         first_name: data.firstName,
         last_name: data.lastName,
@@ -64,10 +85,10 @@ export default function ProfilePage() {
       },
     });
 
-    if (error) {
-      setSaveMessage({ type: 'error', text: error.message });
+    if (profileError || authError) {
+      setSaveMessage({ type: 'error', text: profileError?.message || authError?.message || 'Failed to update' });
     } else {
-      setUser(updatedUser.user);
+      if (updatedUser.user) setUser(updatedUser.user);
       setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
       setTimeout(() => {
         setIsEditing(false);

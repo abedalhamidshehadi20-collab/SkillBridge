@@ -1,42 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
-// Mock data based on the HTML
-const MOCK_PROJECTS = [
-  {
-    id: '1',
-    title: 'Eco-Track Dashboard Redesign',
-    matchScore: 94,
-    description: 'Looking for a UI designer to help revamp the main dashboard of an open-source environmental tracking tool. Focus on data visualization and accessibility.',
-    requiredSkills: ['Figma', 'UI Design', 'Data Viz'],
-    commitment: '5-10 hrs/wk',
-  },
-  {
-    id: '2',
-    title: 'AI Study Companion App',
-    matchScore: 88,
-    description: 'Building a mobile app that uses LLMs to generate personalized study plans and flashcards from lecture notes. Need a strong React Native developer.',
-    requiredSkills: ['React Native', 'TypeScript', 'API Integration'],
-    commitment: '10-15 hrs/wk',
-  },
-  {
-    id: '3',
-    title: 'FinTech Marketing Site',
-    matchScore: 65,
-    description: 'Seeking a frontend developer to build a high-performance marketing site for a new crypto wallet startup using Next.js and Tailwind CSS.',
-    requiredSkills: ['Next.js', 'Tailwind CSS'],
-    commitment: '15+ hrs/wk',
-  },
-];
+type Project = {
+  id: string;
+  title: string;
+  description: string;
+  required_skills: string[];
+  commitment: string;
+};
 
 export default function TeamFinderPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
-  const filteredProjects = MOCK_PROJECTS.filter(
+  useEffect(() => {
+    async function fetchProjects() {
+      const { data } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('status', 'Open'); // or 'Planning', but let's just fetch all for now or 'Planning' as per our default
+        
+      if (data) {
+        setProjects(data as Project[]);
+      }
+      setLoading(false);
+    }
+    fetchProjects();
+  }, [supabase]);
+
+  const filteredProjects = projects.filter(
     (proj) =>
-      proj.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      proj.requiredSkills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
+      (proj.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (proj.required_skills || []).some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -127,8 +126,13 @@ export default function TeamFinderPage() {
 
         {/* Projects Grid */}
         <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-md items-start align-top content-start">
-          {filteredProjects.map((project) => {
-            const isHighMatch = project.matchScore >= 80;
+          {loading ? (
+            <div className="p-xl text-center text-on-surface-variant col-span-full">Loading projects...</div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="p-xl text-center text-on-surface-variant col-span-full">No open projects found.</div>
+          ) : filteredProjects.map((project, index) => {
+            const matchScore = 95 - index * 5; // Mock match score for now
+            const isHighMatch = matchScore >= 80;
             return (
               <article key={project.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-sm">
@@ -138,7 +142,7 @@ export default function TeamFinderPage() {
                     title="Compatibility Score"
                   >
                     <span className="material-symbols-outlined text-[14px]" style={isHighMatch ? { fontVariationSettings: "'FILL' 1" } : {}}>bolt</span>
-                    <span className="font-label-sm text-label-sm font-bold">{project.matchScore}%</span>
+                    <span className="font-label-sm text-label-sm font-bold">{matchScore}%</span>
                   </div>
                 </div>
                 
@@ -149,7 +153,7 @@ export default function TeamFinderPage() {
                 <div className="mb-lg">
                   <p className="font-caption text-caption text-outline mb-2 uppercase tracking-wider font-semibold">Required Skills</p>
                   <div className="flex flex-wrap gap-2">
-                    {project.requiredSkills.map(skill => (
+                    {(project.required_skills || []).map(skill => (
                       <span key={skill} className="bg-surface-container text-on-surface-variant font-caption text-caption px-2.5 py-1 rounded-full border border-outline-variant/50">
                         {skill}
                       </span>
