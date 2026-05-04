@@ -18,8 +18,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { name: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
     { name: 'Skill Swap', icon: 'swap_horiz', href: '/skill-swap' },
-    { name: 'Team Finder', icon: 'group_add', href: '#' },
-    { name: 'Projects', icon: 'assignment', href: '#' },
+    { name: 'Team Finder', icon: 'group_add', href: '/team-finder' },
+    { name: 'Projects', icon: 'assignment', href: '/projects' },
     { name: 'Messages', icon: 'chat_bubble', href: '#' },
     { name: 'Profile', icon: 'account_circle', href: '/profile' },
   ];
