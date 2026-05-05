@@ -3,29 +3,42 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-type Project = {
+type MatchProject = {
   id: string;
   title: string;
   description: string;
   required_skills: string[];
   commitment: string;
+  matchScore: number;
+  matchReason?: string;
 };
 
 export default function TeamFinderPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<MatchProject[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
     async function fetchProjects() {
-      const { data } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('status', 'Open'); // or 'Planning', but let's just fetch all for now or 'Planning' as per our default
-        
-      if (data) {
-        setProjects(data as Project[]);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        try {
+          const res = await fetch('http://localhost:3001/api/v1/matches/projects', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          });
+          const json = await res.json();
+          if (json.matches) {
+            // Sort by match score descending
+            const sorted = json.matches.sort((a: MatchProject, b: MatchProject) => b.matchScore - a.matchScore);
+            setProjects(sorted);
+          }
+        } catch (err) {
+          console.error('Error fetching project matches:', err);
+        }
       }
       setLoading(false);
     }
@@ -127,25 +140,34 @@ export default function TeamFinderPage() {
         {/* Projects Grid */}
         <div className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-md items-start align-top content-start">
           {loading ? (
-            <div className="p-xl text-center text-on-surface-variant col-span-full">Loading projects...</div>
+            <div className="p-xl text-center text-on-surface-variant col-span-full">
+              <span className="material-symbols-outlined text-[48px] text-primary mb-md block animate-pulse">psychiatry</span>
+              <p className="font-body-md text-on-surface-variant">AI is evaluating project compatibility...</p>
+            </div>
           ) : filteredProjects.length === 0 ? (
             <div className="p-xl text-center text-on-surface-variant col-span-full">No open projects found.</div>
-          ) : filteredProjects.map((project, index) => {
-            const matchScore = 95 - index * 5; // Mock match score for now
-            const isHighMatch = matchScore >= 80;
+          ) : filteredProjects.map((project) => {
+            const isHighMatch = project.matchScore >= 80;
             return (
               <article key={project.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-sm">
                   <h2 className="font-h3 text-h3 text-on-surface pr-4">{project.title}</h2>
                   <div 
                     className={`${isHighMatch ? 'bg-secondary-container/20 text-secondary border-secondary-container/30' : 'bg-surface-container text-on-surface-variant border-outline-variant/50'} border px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0`}
-                    title="Compatibility Score"
+                    title={project.matchReason || 'Compatibility Score'}
                   >
                     <span className="material-symbols-outlined text-[14px]" style={isHighMatch ? { fontVariationSettings: "'FILL' 1" } : {}}>bolt</span>
-                    <span className="font-label-sm text-label-sm font-bold">{matchScore}%</span>
+                    <span className="font-label-sm text-label-sm font-bold">{project.matchScore}%</span>
                   </div>
                 </div>
                 
+                {project.matchReason && (
+                  <div className="bg-secondary/5 border border-secondary/10 rounded-lg p-2 mb-sm text-sm font-body-sm text-on-surface-variant italic">
+                    <span className="material-symbols-outlined text-[14px] text-secondary align-middle mr-1">psychiatry</span>
+                    {project.matchReason}
+                  </div>
+                )}
+
                 <p className="font-body-md text-body-md text-on-surface-variant mb-md flex-1">
                   {project.description}
                 </p>

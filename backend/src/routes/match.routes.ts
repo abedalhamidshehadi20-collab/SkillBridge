@@ -127,12 +127,142 @@ ONLY RETURN VALID JSON. Do not wrap in markdown blocks.
       return reply.status(500).send({ error: 'Internal Server Error' });
     }
   });
+
+  fastify.get('/matches/projects', async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      // 1. Authenticate Request
+      const authHeader = request.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return reply.status(401).send({ error: 'Missing or invalid Authorization header' });
+      }
+      
+      const token = authHeader.split(' ')[1];
+      const { data: { user }, error: authError } = await fastify.supabase.auth.getUser(token);
+      
+      if (authError || !user) {
+        return reply.status(401).send({ error: 'Unauthorized' });
+      }
+
+      // 2. Fetch User's Profile
+      const { data: myProfile, error: myProfileError } = await fastify.supabase
+        .from('profiles')
+        .select('id, first_name, last_name, role, can_teach, wants_to_learn')
+        .eq('id', user.id)
+        .single();
+
+      if (myProfileError || !myProfile) {
+        return reply.status(404).send({ error: 'Profile not found' });
+      }
+
+      // 3. Fetch all Open/Planning projects the user doesn't own
+      const { data: projects, error: projectsError } = await fastify.supabase
+        .from('projects')
+        .select('id, title, description, required_skills, commitment, status')
+        .neq('owner_id', user.id)
+        .in('status', ['Open', 'Planning']);
+
+      if (projectsError || !projects || projects.length === 0) {
+        return reply.send({ matches: [] }); // No open projects
+      }
+
+      // 4. Calculate matches using OpenRouter LLM
+      const openRouterKey = process.env.OPENROUTER_API_KEY;
+      if (!openRouterKey) {
+        fastify.log.warn('OPENROUTER_API_KEY is not set. Falling back to dummy scores.');
+        return fallbackProjectScores(projects, reply);
+      }
+
+      const prompt = `
+You are an expert matchmaking AI for a professional networking platform called SkillBridge.
+Given the current user's profile and a list of active projects, calculate a "match score" (0-100) for each project based on how well the user's "can_teach" and "role" align with the project's "required_skills" and "description".
+
+Current User:
+Name: ${myProfile.first_name} ${myProfile.last_name}
+Role: ${myProfile.role}
+Skills (Can Teach): ${JSON.stringify(myProfile.can_teach)}
+Want To Learn: ${JSON.stringify(myProfile.wants_to_learn)}
+
+Open Projects:
+${JSON.stringify(projects)}
+
+Return the results as a JSON array exactly matching this schema:
+[
+  {
+    "id": "uuid of the project",
+    "matchScore": number (0-100),
+    "matchReason": "A 1-sentence explanation of why they are a good fit for this project."
+  }
+]
+
+ONLY RETURN VALID JSON. Do not wrap in markdown blocks.
+      `;
+
+      try {
+        const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openRouterKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              { role: 'user', content: prompt }
+            ],
+            response_format: { type: 'json_object' } // Help ensure JSON output
+          })
+        });
+
+        if (!aiResponse.ok) {
+          const errText = await aiResponse.text();
+          fastify.log.error(`OpenRouter API Error: ${errText}`);
+          return fallbackProjectScores(projects, reply);
+        }
+
+        const aiData: any = await aiResponse.json();
+        let content = aiData.choices[0].message.content;
+        
+        // Clean up markdown wrapping if the model ignored instructions
+        content = content.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        const matchResults: MatchResponse[] = JSON.parse(content);
+        
+        // Merge match data with full project data
+        const enrichedMatches = matchResults.map(match => {
+          const project = projects.find(p => p.id === match.id);
+          return {
+            ...project,
+            matchScore: match.matchScore,
+            matchReason: match.matchReason
+          };
+        }).filter(m => m.id); // Filter out any hallucinated IDs
+
+        return reply.send({ matches: enrichedMatches });
+      } catch (err: any) {
+        fastify.log.error(`Failed to parse or fetch LLM response: ${err.message || String(err)}`);
+        return fallbackProjectScores(projects, reply);
+      }
+
+    } catch (err) {
+      fastify.log.error(err);
+      return reply.status(500).send({ error: 'Internal Server Error' });
+    }
+  });
 }
 
 function fallbackScores(myProfile: any, otherProfiles: any[], reply: FastifyReply) {
   const matches = otherProfiles.map((p, index) => ({
     ...p,
     matchScore: Math.max(0, 95 - index * 10), // Dummy calculation
+    matchReason: 'AI service unavailable. Using default matching.'
+  }));
+  return reply.send({ matches });
+}
+
+function fallbackProjectScores(projects: any[], reply: FastifyReply) {
+  const matches = projects.map((p, index) => ({
+    ...p,
+    matchScore: Math.max(0, 90 - index * 5), // Dummy calculation
     matchReason: 'AI service unavailable. Using default matching.'
   }));
   return reply.send({ matches });
