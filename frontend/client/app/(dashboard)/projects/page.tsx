@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
 
 type Project = {
   id: string;
@@ -78,10 +79,13 @@ export default function ProjectsPage() {
             Manage your active collaborations and track milestones.
           </p>
         </div>
-        <button className="inline-flex items-center justify-center gap-2 px-md py-sm rounded-lg btn-primary-gradient text-on-primary font-label-sm text-label-sm inner-glow shadow-sm hover:opacity-90 transition-opacity">
+        <Link 
+          href="/projects/new"
+          className="inline-flex items-center justify-center gap-2 px-md py-sm rounded-lg btn-primary-gradient text-on-primary font-label-sm text-label-sm inner-glow shadow-sm hover:opacity-90 transition-opacity"
+        >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Create New Project
-        </button>
+        </Link>
       </header>
 
       {/* Projects Grid */}
