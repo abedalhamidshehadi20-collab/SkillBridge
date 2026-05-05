@@ -157,7 +157,7 @@ ONLY RETURN VALID JSON. Do not wrap in markdown blocks.
       // 3. Fetch all Open/Planning projects the user doesn't own
       const { data: projects, error: projectsError } = await fastify.supabase
         .from('projects')
-        .select('id, title, description, required_skills, commitment, status')
+        .select('id, owner_id, title, description, required_skills, commitment, status')
         .neq('owner_id', user.id)
         .in('status', ['Open', 'Planning']);
 

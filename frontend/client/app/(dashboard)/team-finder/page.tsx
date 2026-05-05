@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { getOrCreateConversation } from '@/lib/api/chat';
 
 type MatchProject = {
   id: string;
+  owner_id: string;
   title: string;
   description: string;
   required_skills: string[];
@@ -17,7 +20,9 @@ export default function TeamFinderPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [projects, setProjects] = useState<MatchProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isStartingChat, setIsStartingChat] = useState<string | null>(null);
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchProjects() {
@@ -44,6 +49,23 @@ export default function TeamFinderPage() {
     }
     fetchProjects();
   }, [supabase]);
+
+  const handleJoinTeam = async (project: MatchProject) => {
+    setIsStartingChat(project.id);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const convoId = await getOrCreateConversation(supabase, user.id, project.owner_id);
+      if (convoId) {
+        router.push(`/messages?conversationId=${convoId}`);
+      }
+    } catch (err) {
+      console.error('Failed to start chat:', err);
+    } finally {
+      setIsStartingChat(null);
+    }
+  };
 
   const filteredProjects = projects.filter(
     (proj) =>
@@ -190,12 +212,20 @@ export default function TeamFinderPage() {
                   </div>
                   
                   {isHighMatch ? (
-                    <button className="btn-primary-gradient text-white font-label-sm text-label-sm px-4 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-                      View Project
+                    <button 
+                      onClick={() => handleJoinTeam(project)}
+                      disabled={isStartingChat === project.id}
+                      className="btn-primary-gradient text-white font-label-sm text-label-sm px-4 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {isStartingChat === project.id ? 'Connecting...' : 'Join Team'}
                     </button>
                   ) : (
-                    <button className="bg-surface border border-outline-variant text-on-surface hover:bg-surface-container font-label-sm text-label-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
-                      Join Team
+                    <button 
+                      onClick={() => handleJoinTeam(project)}
+                      disabled={isStartingChat === project.id}
+                      className="bg-surface border border-outline-variant text-on-surface hover:bg-surface-container font-label-sm text-label-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {isStartingChat === project.id ? 'Connecting...' : 'Message'}
                     </button>
                   )}
                 </div>

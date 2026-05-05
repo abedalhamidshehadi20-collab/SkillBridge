@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { getOrCreateConversation } from '@/lib/api/chat';
 
 type MatchProfile = {
   id: string;
@@ -18,6 +20,26 @@ type MatchProfile = {
 function SkillSwapCard({ profile }: { profile: MatchProfile }) {
   const isHighMatch = profile.matchScore >= 80;
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Anonymous';
+  const router = useRouter();
+  const supabase = createClient();
+  const [isStartingChat, setIsStartingChat] = useState(false);
+
+  const handleRequestSwap = async () => {
+    setIsStartingChat(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const convoId = await getOrCreateConversation(supabase, user.id, profile.id);
+      if (convoId) {
+        router.push(`/messages?conversationId=${convoId}`);
+      }
+    } catch (err) {
+      console.error('Failed to start chat:', err);
+    } finally {
+      setIsStartingChat(false);
+    }
+  };
 
   return (
     <article className="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0px_10px_25px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col h-full group relative overflow-hidden">
@@ -108,9 +130,22 @@ function SkillSwapCard({ profile }: { profile: MatchProfile }) {
       </div>
 
       {/* CTA */}
-      <button className="w-full bg-gradient-to-br from-primary to-secondary text-on-primary rounded-lg py-sm px-md font-label-sm text-label-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-90 hover:shadow-md transition-all flex items-center justify-center gap-sm mt-auto">
-        <span className="material-symbols-outlined text-[18px]">handshake</span>
-        Request Swap
+      <button 
+        onClick={handleRequestSwap}
+        disabled={isStartingChat}
+        className="w-full bg-gradient-to-br from-primary to-secondary text-on-primary rounded-lg py-sm px-md font-label-sm text-label-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-90 hover:shadow-md transition-all flex items-center justify-center gap-sm mt-auto disabled:opacity-50"
+      >
+        {isStartingChat ? (
+          <>
+            <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+            Connecting...
+          </>
+        ) : (
+          <>
+            <span className="material-symbols-outlined text-[18px]">handshake</span>
+            Request Swap
+          </>
+        )}
       </button>
     </article>
   );
