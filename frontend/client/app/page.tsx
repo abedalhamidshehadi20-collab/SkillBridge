@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import NavAuth from '@/app/components/NavAuth';
 
 const categories = [
   { name: 'Development', count: '120+ Courses', icon: 'terminal' },
@@ -101,23 +102,7 @@ export default function Home() {
                 type="text"
               />
             </div>
-            <Link
-              className="inline-flex h-9 items-center rounded-md border border-[#c7cddd] bg-white px-4 text-[13px] font-semibold text-primary transition-colors hover:bg-[#eef1f8]"
-              href="/login"
-            >
-              Log In
-            </Link>
-            <Link
-              className="inline-flex h-9 items-center rounded-md bg-gradient-to-r from-[#4f46e5] to-[#4338ca] px-4 text-[13px] font-semibold text-white shadow-sm transition-opacity hover:opacity-90"
-              href="/register"
-            >
-              Get Started
-            </Link>
-            <img
-              alt="User profile"
-              className="hidden h-10 w-10 rounded-full border border-[#c7cddd] object-cover md:block"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfAy401-vku_Gf-a_Wa0OJ4mz8JuyPKfRjYuzN7QJTB0lZpUpzUWgSXpfbRm62MvzMwXkiRWKG9ILgrWooC0MuXqGMmoKfGuSppjfh5JAkE3hwI-Zh08ZMg0DjFGjVLDFh_YjUjU1O5pMz7oOvWet_-X54FnggF7YuwzZW7_2x5jZ2sapy4ZNuvZIYh6PdzSPYJw1mO94E4BaHuWWV7BWEtmAW8F-j4YlXsOkiR-g2bBfpiYUwJEFXdUnCfsTn3qjfihOEqHnIYQp5"
-            />
+            <NavAuth />
           </div>
         </nav>
       </header>
@@ -137,17 +122,11 @@ export default function Home() {
               professional growth in a premium, distraction-free environment.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link
-                className="inline-flex h-12 items-center gap-2 rounded-lg bg-gradient-to-r from-[#4f46e5] to-[#4338ca] px-6 text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(67,56,202,0.25)]"
-                href="/register"
-              >
+              <Link className="btn-primary h-12 px-7 text-[15px]" href="/register">
                 Get Started
                 <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </Link>
-              <button
-                className="inline-flex h-12 items-center gap-2 rounded-lg border border-[#c7cddd] bg-white px-6 text-[15px] font-semibold text-[#1e2433]"
-                type="button"
-              >
+              <button className="btn-ghost h-12 px-7 text-[15px]" type="button">
                 <span className="material-symbols-outlined text-[18px]">play_circle</span>
                 Watch Demo
               </button>

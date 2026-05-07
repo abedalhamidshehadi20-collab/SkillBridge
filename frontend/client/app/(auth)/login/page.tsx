@@ -128,7 +128,7 @@ export default function LoginPage() {
             </div>
 
             <button
-              className="w-full h-12 mt-md bg-gradient-to-r from-primary to-secondary text-on-primary rounded-lg font-label-md text-label-md shadow-sm hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed"
+              className="btn-primary w-full h-12 mt-md text-label-md"
               type="submit"
               disabled={isPending}
             >
@@ -144,7 +144,7 @@ export default function LoginPage() {
 
           <div className="space-y-sm">
             <button
-              className="w-full h-12 bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md flex items-center justify-center gap-sm hover:bg-surface-container-low transition-colors shadow-sm"
+              className="btn-ghost w-full h-12 text-label-md"
               type="button"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

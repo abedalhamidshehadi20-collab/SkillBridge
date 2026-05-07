@@ -176,7 +176,7 @@ export default function RegisterPage() {
             <button
               onClick={handleResend}
               disabled={resendCooldown > 0 || resendStatus === 'sending'}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-on-primary font-label-md text-label-md hover:opacity-90 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+              className="btn-primary h-12"
             >
               {resendStatus === 'sending' ? (
                 <>
@@ -376,7 +376,7 @@ export default function RegisterPage() {
             </div>
 
             <button
-              className="w-full py-4 bg-primary text-on-primary rounded-lg font-label-md text-[16px] shadow-md hover:bg-surface-tint hover:shadow-lg transition-all duration-200 mt-md flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="btn-primary w-full py-4 text-[16px] mt-md"
               type="submit"
               disabled={isPending}
             >

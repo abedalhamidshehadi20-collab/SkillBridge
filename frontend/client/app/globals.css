@@ -1,8 +1,60 @@
 @import "tailwindcss";
 
+/* ─── Light mode tokens ─────────────────────────────────────── */
 :root {
   --background: #fcf8ff;
   --foreground: #1b1b24;
+}
+
+/* ─── Dark mode tokens ──────────────────────────────────────── */
+.dark {
+  --background: #111118;
+  --foreground: #e4e1ee;
+}
+
+/* Override design-system color tokens in dark mode */
+.dark {
+  --color-background:              #111118;
+  --color-surface:                 #1b1b24;
+  --color-surface-dim:             #111118;
+  --color-surface-bright:          #2a2937;
+  --color-surface-container-lowest: #0d0d14;
+  --color-surface-container-low:   #1b1b24;
+  --color-surface-container:       #1f1f2c;
+  --color-surface-container-high:  #252533;
+  --color-surface-container-highest: #2e2d3e;
+  --color-surface-variant:         #2e2d3e;
+  --color-on-background:           #e4e1ee;
+  --color-on-surface:              #e4e1ee;
+  --color-on-surface-variant:      #c7c4d8;
+  --color-outline:                 #928fa6;
+  --color-outline-variant:         #46454f;
+  --color-inverse-surface:         #e4e1ee;
+  --color-inverse-on-surface:      #302f39;
+  --color-primary:                 #c3c0ff;
+  --color-on-primary:              #1a0096;
+  --color-primary-container:       #3525cd;
+  --color-on-primary-container:    #e2dfff;
+  --color-secondary:               #d0bcff;
+  --color-on-secondary:            #381e72;
+  --color-secondary-container:     #5516be;
+  --color-on-secondary-container:  #eddcff;
+  --color-error:                   #ffb4ab;
+  --color-on-error:                #690005;
+  --color-error-container:         #93000a;
+  --color-on-error-container:      #ffdad6;
+  --color-surface-tint:            #c3c0ff;
+}
+
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+/* But NOT for animations/transforms */
+[style*="animation"], [class*="animate-"] {
+  transition: none !important;
 }
 
 @theme inline {
@@ -134,6 +186,56 @@ body {
 html { scroll-behavior: smooth; }
 *:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
+/* ─── Reusable button styles ──────────────────────────────────── */
+/* Solid primary button — matches reference "Get Started" / "Join free" */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 9999px; /* Pill shape */
+  background-color: #3b82f6; /* True blue */
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+}
+.btn-primary:hover { background-color: #2563eb; box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Ghost / outline button — matches reference "Log In" / "Sign in" */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 9999px; /* Pill shape */
+  background-color: transparent;
+  color: #0f4a8a; /* Deep blue text to match reference */
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1.5px solid #dbeafe; /* Light blue border */
+  transition: background-color 150ms ease, border-color 150ms ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-ghost:hover { background-color: #eff6ff; border-color: #bfdbfe; }
+.btn-ghost:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Dark mode overrides */
+.dark .btn-ghost { color: #bfdbfe; border-color: #1e3a8a; }
+.dark .btn-ghost:hover { background-color: #172554; border-color: #1e3a8a; }
+
+
 /* Auth flow animations */
 @keyframes pulse-ring {
   0%, 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.2); }
@@ -164,4 +266,8 @@ html { scroll-behavior: smooth; }
   0% { transform: translateY(0) rotate(0deg) scale(0); opacity: 1; }
   50% { opacity: 1; }
   100% { transform: translateY(60px) rotate(720deg) scale(1); opacity: 0; }
+}
+@keyframes fade-slide-down {
+  0% { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0); }
 }

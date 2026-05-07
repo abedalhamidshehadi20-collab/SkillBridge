@@ -3,6 +3,78 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { useTheme } from '@/lib/theme';
+
+function ThemeToggle({ compact = false }: { compact?: boolean }) {
+  const { theme, toggle } = useTheme();
+  const isDark = theme === 'dark';
+
+  return (
+    <button
+      onClick={toggle}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      title={isDark ? 'Light mode' : 'Dark mode'}
+      className={`
+        relative flex items-center gap-3 rounded-lg px-3 py-2 w-full
+        text-slate-500 dark:text-slate-400
+        hover:bg-slate-100 dark:hover:bg-slate-900
+        font-sans text-sm font-semibold
+        hover:translate-x-1 transition-all duration-200
+        ${compact ? 'justify-center px-2' : ''}
+      `}
+    >
+      {/* Animated icon swap */}
+      <span className="relative w-5 h-5 flex items-center justify-center shrink-0">
+        {/* Sun icon */}
+        <span
+          className="material-symbols-outlined text-[20px] absolute transition-all duration-300"
+          style={{
+            fontVariationSettings: "'FILL' 1",
+            opacity: isDark ? 0 : 1,
+            transform: isDark ? 'rotate(-90deg) scale(0.5)' : 'rotate(0deg) scale(1)',
+          }}
+        >
+          light_mode
+        </span>
+        {/* Moon icon */}
+        <span
+          className="material-symbols-outlined text-[20px] absolute transition-all duration-300"
+          style={{
+            fontVariationSettings: "'FILL' 1",
+            opacity: isDark ? 1 : 0,
+            transform: isDark ? 'rotate(0deg) scale(1)' : 'rotate(90deg) scale(0.5)',
+          }}
+        >
+          dark_mode
+        </span>
+      </span>
+
+      {!compact && (
+        <span className="flex-1 text-left">
+          {isDark ? 'Dark mode' : 'Light mode'}
+        </span>
+      )}
+
+      {/* Pill toggle track */}
+      {!compact && (
+        <div
+          className={`
+            relative w-9 h-5 rounded-full shrink-0 transition-colors duration-300
+            ${isDark ? 'bg-primary' : 'bg-slate-300'}
+          `}
+        >
+          <div
+            className={`
+              absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm
+              transition-transform duration-300
+              ${isDark ? 'translate-x-4' : 'translate-x-0.5'}
+            `}
+          />
+        </div>
+      )}
+    </button>
+  );
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -61,10 +133,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           );
         })}
 
-        <div className="mt-auto flex flex-col gap-y-2">
-          <button className="w-full py-2 px-4 rounded-lg bg-primary-container text-on-primary-container font-label-sm hover:opacity-90 transition-opacity mb-4">
+        <div className="mt-auto flex flex-col gap-y-1">
+          <button className="w-full py-2 px-4 rounded-lg bg-primary-container text-on-primary-container font-label-sm hover:opacity-90 transition-opacity mb-3">
             Upgrade to Pro
           </button>
+
+          {/* ── Theme Toggle ── */}
+          <ThemeToggle />
+
           <Link
             href="#"
             className="flex items-center gap-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg px-3 py-2 font-sans text-sm font-semibold hover:translate-x-1 transition-transform duration-200"
@@ -82,13 +158,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </nav>
 
-      {/* TopNavBar (MOBILE ONLY - Replaces SideNav) */}
+      {/* TopNavBar (MOBILE ONLY) */}
       <nav className="md:hidden flex justify-between items-center w-full px-6 py-3 fixed top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none font-sans text-sm font-medium tracking-tight">
         <div className="text-xl font-black tracking-tighter text-indigo-600 dark:text-indigo-400">
           SkillBridge
         </div>
-        <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-slate-600 cursor-pointer">menu</span>
+        <div className="flex items-center gap-3">
+          {/* Compact icon-only toggle for mobile */}
+          <ThemeToggle compact />
+          <span className="material-symbols-outlined text-slate-600 dark:text-slate-400 cursor-pointer">menu</span>
         </div>
       </nav>
 

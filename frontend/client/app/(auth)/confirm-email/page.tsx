@@ -163,7 +163,7 @@ export default function ConfirmEmailPage() {
             <button
               onClick={handleResend}
               disabled={resendCooldown > 0 || resendStatus === 'sending' || !resendEmail}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-on-primary font-label-md text-label-md hover:opacity-90 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-[#4f46e5] text-white font-label-md text-label-md hover:bg-[#4338ca] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {resendStatus === 'sending' ? (
                 <>
@@ -196,7 +196,7 @@ export default function ConfirmEmailPage() {
 
             <Link
               href="/login"
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors"
+              className="btn-ghost h-12 w-full"
             >
               <span className="material-symbols-outlined text-lg mr-2">arrow_back</span>
               Back to login
