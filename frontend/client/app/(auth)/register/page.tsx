@@ -1,7 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +21,51 @@ export default function RegisterPage() {
   const [registeredEmail, setRegisteredEmail] = useState<string>('');
   const [screenReaderOptimized, setScreenReaderOptimized] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // Resend state
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResend = useCallback(async () => {
+    if (resendCooldown > 0 || !registeredEmail) return;
+    setResendStatus('sending');
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: registeredEmail,
+        options: {
+          emailRedirectTo: `${window.location.origin}/confirm-email`,
+        },
+      });
+      if (error) {
+        setResendStatus('error');
+        setTimeout(() => setResendStatus('idle'), 3000);
+      } else {
+        setResendStatus('sent');
+        setResendCooldown(60);
+        setTimeout(() => setResendStatus('idle'), 3000);
+      }
+    } catch {
+      setResendStatus('error');
+      setTimeout(() => setResendStatus('idle'), 3000);
+    }
+  }, [resendCooldown, registeredEmail]);
 
   const {
     register,
@@ -63,36 +108,118 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center p-md sm:p-lg antialiased">
-        <div className="w-full max-w-[480px] bg-surface-container-lowest rounded-xl border border-surface-variant shadow-[0_10px_30px_rgba(0,0,0,0.08)] p-lg sm:p-xl text-center">
-          <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center mx-auto mb-md shadow-sm">
+        {/* Subtle dot pattern */}
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 z-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 25% 25%, var(--color-primary) 1px, transparent 1px), radial-gradient(circle at 75% 75%, var(--color-secondary) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+
+        <div
+          className="w-full max-w-[480px] bg-surface-container-lowest rounded-xl border border-surface-variant shadow-[0_10px_30px_rgba(0,0,0,0.08)] p-lg sm:p-xl text-center relative z-10"
+          style={{ animation: 'fade-slide-up 0.5s ease-out forwards' }}
+        >
+          {/* Animated mail icon */}
+          <div
+            className="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mx-auto mb-md shadow-sm"
+            style={{ animation: 'pop-in 0.6s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}
+          >
             <span
-              className="material-symbols-outlined text-on-primary-container text-3xl"
+              className="material-symbols-outlined text-on-primary-container text-4xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
-              check
+              mark_email_unread
             </span>
           </div>
+
           <h1 className="font-h2 text-h2 text-on-background mb-xs">Check your email</h1>
           <p className="font-body-md text-body-md text-secondary mb-sm">
-            We sent a confirmation link to <span className="font-semibold text-on-surface">{registeredEmail}</span>.
+            We sent a confirmation link to{' '}
+            <span className="font-semibold text-on-surface">{registeredEmail}</span>
           </p>
-          <p className="font-body-sm text-body-sm text-on-surface-variant mb-md">
-            Open the email and click the link to activate your account before logging in.
-          </p>
+
+          {/* Steps to complete */}
+          <div className="bg-surface-container rounded-lg border border-surface-variant p-md mb-lg text-left">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-on-primary-container text-xs font-bold">1</span>
+              </div>
+              <p className="font-body-sm text-body-sm text-on-surface">
+                Open your email inbox for <span className="font-medium">{registeredEmail}</span>
+              </p>
+            </div>
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-on-primary-container text-xs font-bold">2</span>
+              </div>
+              <p className="font-body-sm text-body-sm text-on-surface">
+                Click the confirmation link in the email
+              </p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-on-primary-container text-xs font-bold">3</span>
+              </div>
+              <p className="font-body-sm text-body-sm text-on-surface">
+                You&apos;ll be redirected to your dashboard
+              </p>
+            </div>
+          </div>
+
+          {/* Action buttons */}
           <div className="flex flex-col gap-sm">
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-opacity"
-              href="/resend-confirmation"
+            {/* Resend button */}
+            <button
+              onClick={handleResend}
+              disabled={resendCooldown > 0 || resendStatus === 'sending'}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-on-primary font-label-md text-label-md hover:opacity-90 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
             >
-              Resend confirmation email
-            </Link>
+              {resendStatus === 'sending' ? (
+                <>
+                  <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
+                  Sending...
+                </>
+              ) : resendStatus === 'sent' ? (
+                <>
+                  <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  Email sent!
+                </>
+              ) : resendCooldown > 0 ? (
+                <>
+                  <span className="material-symbols-outlined text-lg">timer</span>
+                  Resend in {resendCooldown}s
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-lg">send</span>
+                  Resend confirmation email
+                </>
+              )}
+            </button>
+
+            {resendStatus === 'error' && (
+              <p className="text-error text-xs text-center">
+                Failed to resend email. Please try again.
+              </p>
+            )}
+
             <Link
-              className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors"
               href="/login"
             >
+              <span className="material-symbols-outlined text-lg">arrow_back</span>
               Back to login
             </Link>
           </div>
+
+          {/* Tip */}
+          <p className="font-body-sm text-body-sm text-outline mt-md">
+            Didn&apos;t receive the email? Check your spam folder.
+          </p>
         </div>
       </div>
     );
