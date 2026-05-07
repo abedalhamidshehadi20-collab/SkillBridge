@@ -65,7 +65,7 @@ const homeMarkup = `
 <div class="flex items-center gap-xl">
 <span class="font-h3 text-h3 font-bold text-primary dark:text-primary-fixed-dim">EduFlow</span>
 <div class="hidden md:flex gap-lg">
-<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150" href="#">Marketplace</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150" href="/marketplace">Marketplace</a>
 <a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150" href="#">Success Stories</a>
 <a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-colors active:scale-95 duration-150" href="#">Enterprise</a>
 </div>
