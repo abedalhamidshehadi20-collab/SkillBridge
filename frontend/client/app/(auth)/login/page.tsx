@@ -188,7 +188,7 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
