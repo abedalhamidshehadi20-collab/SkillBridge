@@ -55,17 +55,24 @@
   --color-on-error-container: #93000a;
 
   --spacing-lg: 24px;
+  --spacing-base: 8px;
   --spacing-xs: 4px;
   --spacing-margin: 32px;
   --spacing-xl: 40px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  --spacing-container-max: 1280px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-gutter: 24px;
 
+  --font-h4: var(--font-inter);
   --font-h2: var(--font-inter);
+  --font-label-md: var(--font-inter);
   --font-label-sm: var(--font-inter);
   --font-h1: var(--font-inter);
   --font-body-md: var(--font-inter);
+  --font-body-sm: var(--font-inter);
   --font-caption: var(--font-inter);
   --font-body-lg: var(--font-inter);
   --font-h3: var(--font-inter);
@@ -80,6 +87,12 @@ body {
 .font-h2 { font-size: 30px; line-height: 1.3; letter-spacing: -0.01em; font-weight: 600; }
 .text-h2 { font-size: 30px; line-height: 1.3; letter-spacing: -0.01em; font-weight: 600; }
 
+.font-h4 { font-size: 20px; line-height: 28px; letter-spacing: 0; font-weight: 600; }
+.text-h4 { font-size: 20px; line-height: 28px; letter-spacing: 0; font-weight: 600; }
+
+.font-label-md { font-size: 14px; line-height: 20px; letter-spacing: 0.01em; font-weight: 600; }
+.text-label-md { font-size: 14px; line-height: 20px; letter-spacing: 0.01em; font-weight: 600; }
+
 .font-label-sm { font-size: 14px; line-height: 1; letter-spacing: 0.01em; font-weight: 500; }
 .text-label-sm { font-size: 14px; line-height: 1; letter-spacing: 0.01em; font-weight: 500; }
 
@@ -88,6 +101,9 @@ body {
 
 .font-body-md { font-size: 16px; line-height: 1.5; letter-spacing: 0; font-weight: 400; }
 .text-body-md { font-size: 16px; line-height: 1.5; letter-spacing: 0; font-weight: 400; }
+
+.font-body-sm { font-size: 14px; line-height: 20px; letter-spacing: 0; font-weight: 400; }
+.text-body-sm { font-size: 14px; line-height: 20px; letter-spacing: 0; font-weight: 400; }
 
 .font-caption { font-size: 12px; line-height: 1; letter-spacing: 0; font-weight: 400; }
 .text-caption { font-size: 12px; line-height: 1; letter-spacing: 0; font-weight: 400; }
@@ -104,6 +120,15 @@ body {
 .inner-glow { box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2); }
 .card-shadow { box-shadow: 0px 4px 12px rgba(0,0,0,0.05); }
 .card-shadow-hover { box-shadow: 0px 10px 25px rgba(0,0,0,0.1); }
+.glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
+.btn-gradient { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+.shadow-ambient-lg { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+.shadow-ambient-md { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+
+.max-w-container-max { max-width: var(--spacing-container-max); }
+.line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
 
 html { scroll-behavior: smooth; }
 *:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
