@@ -50,7 +50,7 @@ export default function RegisterPage() {
         type: 'signup',
         email: registeredEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/confirm-email`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       });
       if (error) {
@@ -87,7 +87,7 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/confirm-email`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
           data: {
             first_name: firstName,
             last_name: lastName,

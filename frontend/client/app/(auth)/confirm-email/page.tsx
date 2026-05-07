@@ -1,15 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function ConfirmEmailPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'idle'>('verifying');
-  const [message, setMessage] = useState('Verifying your email...');
+  const [status, setStatus] = useState<'error' | 'idle'>('idle');
+  const [message, setMessage] = useState('Open the confirmation link from your email to verify your account.');
 
   // Resend state
   const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
@@ -40,7 +39,7 @@ export default function ConfirmEmailPage() {
         type: 'signup',
         email: resendEmail,
         options: {
-          emailRedirectTo: `${window.location.origin}/confirm-email`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       });
       if (error) {
@@ -58,68 +57,41 @@ export default function ConfirmEmailPage() {
   }, [resendCooldown, resendEmail]);
 
   useEffect(() => {
-    const verify = async () => {
-      const token_hash = searchParams.get('token_hash');
-      const type = searchParams.get('type');
-      const email = searchParams.get('email');
+    const email = searchParams.get('email');
+    const errorMsg = searchParams.get('error');
 
-      if (email) {
-        setResendEmail(email);
-      }
+    if (email) {
+      setResendEmail(email);
+    }
 
-      if (!token_hash || !type) {
-        setStatus('idle');
-        setMessage('Open the confirmation link from your email to verify your account.');
-        return;
-      }
+    if (errorMsg) {
+      // Came from /auth/callback after a failed code exchange
+      setStatus('error');
+      setMessage(errorMsg);
+    } else {
+      // Default: user arrived here from the register "check your email" screen
+      setStatus('idle');
+      setMessage('Open the confirmation link from your email to verify your account.');
+    }
+  }, [searchParams]);
 
-      const supabase = createClient();
-      const { error } = await supabase.auth.verifyOtp({
-        token_hash,
-        type: type as 'signup' | 'invite' | 'magiclink' | 'recovery' | 'email_change' | 'email',
-      });
-
-      if (error) {
-        setStatus('error');
-        setMessage(error.message);
-        return;
-      }
-
-      setStatus('success');
-      setMessage('Your email has been confirmed! Redirecting you to the dashboard...');
-      setTimeout(() => {
-        router.push('/dashboard');
-        router.refresh();
-      }, 2000);
-    };
-
-    void verify();
-  }, [router, searchParams]);
 
   const iconMap = {
-    verifying: 'hourglass_top',
-    success: 'check_circle',
     error: 'error',
     idle: 'mark_email_unread',
   };
 
   const titleMap = {
-    verifying: 'Verifying your email',
-    success: 'Email confirmed!',
     error: 'Verification failed',
     idle: 'Confirm your email',
   };
 
   const iconContainerClass = {
-    verifying: 'bg-primary-container',
-    success: 'bg-[#dcfce7]',
     error: 'bg-error-container',
     idle: 'bg-primary-container',
   };
 
   const iconClass = {
-    verifying: 'text-on-primary-container',
-    success: 'text-[#166534]',
     error: 'text-on-error-container',
     idle: 'text-on-primary-container',
   };
@@ -138,38 +110,14 @@ export default function ConfirmEmailPage() {
       />
 
       <main className="w-full max-w-[480px] bg-surface-container-lowest rounded-xl border border-surface-variant shadow-[0_10px_30px_rgba(0,0,0,0.08)] p-lg sm:p-xl text-center relative z-10">
-        {/* Success particles effect */}
-        {status === 'success' && (
-          <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none" aria-hidden="true">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2 h-2 rounded-full"
-                style={{
-                  left: `${10 + Math.random() * 80}%`,
-                  top: `${10 + Math.random() * 40}%`,
-                  backgroundColor: ['#4f46e5', '#6b38d4', '#22c55e', '#eab308', '#ec4899'][i % 5],
-                  animation: `confetti-fall ${1.5 + Math.random() * 1.5}s ease-out ${Math.random() * 0.5}s forwards`,
-                  opacity: 0,
-                }}
-              />
-            ))}
-          </div>
-        )}
-
         {/* Status icon */}
         <div
           className={`w-20 h-20 ${iconContainerClass[status]} rounded-full flex items-center justify-center mx-auto mb-md shadow-sm transition-all duration-500`}
-          style={{
-            animation: status === 'verifying' ? 'pulse-ring 2s ease-in-out infinite' : status === 'success' ? 'pop-in 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' : undefined,
-          }}
+          style={{ animation: 'pop-in 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards' }}
         >
           <span
             className={`material-symbols-outlined ${iconClass[status]} text-4xl transition-all duration-300`}
-            style={{
-              fontVariationSettings: status === 'success' ? "'FILL' 1" : "'FILL' 0",
-              animation: status === 'verifying' ? 'spin-slow 2s linear infinite' : undefined,
-            }}
+            style={{ fontVariationSettings: "'FILL' 1" }}
           >
             {iconMap[status]}
           </span>
@@ -185,30 +133,6 @@ export default function ConfirmEmailPage() {
           {message}
         </p>
 
-        {/* Success state — progress bar */}
-        {status === 'success' && (
-          <div className="w-full bg-surface-container rounded-full h-1.5 mb-lg overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
-              style={{ animation: 'progress-fill 2s ease-in-out forwards' }}
-            />
-          </div>
-        )}
-
-        {/* Verifying state — pulsing dots */}
-        {status === 'verifying' && (
-          <div className="flex items-center justify-center gap-1.5 mb-lg">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-2 h-2 rounded-full bg-primary"
-                style={{
-                  animation: `bounce-dot 1.4s ease-in-out ${i * 0.16}s infinite`,
-                }}
-              />
-            ))}
-          </div>
-        )}
 
         {/* Error & Idle — action buttons with inline resend */}
         {(status === 'error' || status === 'idle') && (

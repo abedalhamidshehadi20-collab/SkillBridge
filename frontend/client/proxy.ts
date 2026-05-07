@@ -1,48 +1,60 @@
+import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
-import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
 export async function proxy(request: NextRequest) {
-  // First, let the session update middleware run to refresh cookies if needed
+  // Refresh the Supabase session on every request (keeps cookies fresh)
   const response = await updateSession(request);
 
-  // Now, check the session status for protecting routes
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
+  const { pathname } = request.nextUrl;
+
+  // Only protect /dashboard routes — everything else is public
+  if (pathname.startsWith('/dashboard')) {
+    // Read session from the (possibly refreshed) cookies
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll() {
+            // Cookies are set by updateSession above; nothing to do here
+          },
         },
-        setAll() {
-          // Can be ignored here as we just want to read the auth state
-        },
-      },
+      }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('next', pathname);
+      return NextResponse.redirect(loginUrl);
     }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Define protected routes
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || 
-                           request.nextUrl.pathname.startsWith('/profile') ||
-                           request.nextUrl.pathname.startsWith('/skills');
-
-  // Define auth routes (login/register)
-  const isAuthRoute = request.nextUrl.pathname === '/login' || 
-                      request.nextUrl.pathname === '/register';
-
-  if (isProtectedRoute && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
   }
 
-  if (isAuthRoute && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+  // Redirect already-authenticated users away from auth pages
+  if (pathname === '/login' || pathname === '/register') {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll() {},
+        },
+      }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
   }
 
   return response;
@@ -50,6 +62,14 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    /*
+     * Match all paths except:
+     * - _next/static (Next.js static files)
+     * - _next/image  (Next.js image optimization)
+     * - favicon.ico
+     * - auth/callback (the code-exchange handler itself)
+     * - public files (images, fonts, etc.)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)',
   ],
 };
