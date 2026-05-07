@@ -1,7 +1,6 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -19,9 +18,9 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>('');
   const [screenReaderOptimized, setScreenReaderOptimized] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const {
     register,
@@ -43,6 +42,7 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/confirm-email`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -54,12 +54,8 @@ export default function RegisterPage() {
       if (error) {
         setError(error.message);
       } else {
+        setRegisteredEmail(data.email);
         setSuccess(true);
-        // Automatically redirect to dashboard after a short delay
-        setTimeout(() => {
-          router.push('/dashboard');
-          router.refresh();
-        }, 2000);
       }
     });
   };
@@ -76,10 +72,27 @@ export default function RegisterPage() {
               check
             </span>
           </div>
-          <h1 className="font-h2 text-h2 text-on-background mb-xs">Account Created!</h1>
-          <p className="font-body-md text-body-md text-secondary">
-            Welcome to SkillBridge. Redirecting you to your dashboard...
+          <h1 className="font-h2 text-h2 text-on-background mb-xs">Check your email</h1>
+          <p className="font-body-md text-body-md text-secondary mb-sm">
+            We sent a confirmation link to <span className="font-semibold text-on-surface">{registeredEmail}</span>.
           </p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant mb-md">
+            Open the email and click the link to activate your account before logging in.
+          </p>
+          <div className="flex flex-col gap-sm">
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 transition-opacity"
+              href="/resend-confirmation"
+            >
+              Resend confirmation email
+            </Link>
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors"
+              href="/login"
+            >
+              Back to login
+            </Link>
+          </div>
         </div>
       </div>
     );
