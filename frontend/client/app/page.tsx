@@ -75,8 +75,8 @@ const homeMarkup = `
 <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-outline">search</span>
 <input class="pl-xl pr-sm py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-64 text-body-sm font-body-sm" placeholder="Search courses..." type="text"/>
 </div>
-<button class="font-label-md text-label-md text-primary bg-surface border border-outline-variant px-md py-sm rounded-lg hover:bg-surface-container-low transition-colors active:scale-95 h-10 md:h-12 flex items-center justify-center">Log In</button>
-<button class="font-label-md text-label-md text-on-primary btn-gradient px-md py-sm rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-ambient-md h-10 md:h-12 flex items-center justify-center">Get Started</button>
+<a class="font-label-md text-label-md text-primary bg-surface border border-outline-variant px-md py-sm rounded-lg hover:bg-surface-container-low transition-colors active:scale-95 h-10 md:h-12 flex items-center justify-center" href="/login">Log In</a>
+<a class="font-label-md text-label-md text-on-primary btn-gradient px-md py-sm rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-ambient-md h-10 md:h-12 flex items-center justify-center" href="/register">Get Started</a>
 <img alt="User profile" class="w-10 h-10 rounded-full border border-outline-variant cursor-pointer hidden md:block object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfAy401-vku_Gf-a_Wa0OJ4mz8JuyPKfRjYuzN7QJTB0lZpUpzUWgSXpfbRm62MvzMwXkiRWKG9ILgrWooC0MuXqGMmoKfGuSppjfh5JAkE3hwI-Zh08ZMg0DjFGjVLDFh_YjUjU1O5pMz7oOvWet_-X54FnggF7YuwzZW7_2x5jZ2sapy4ZNuvZIYh6PdzSPYJw1mO94E4BaHuWWV7BWEtmAW8F-j4YlXsOkiR-g2bBfpiYUwJEFXdUnCfsTn3qjfihOEqHnIYQp5"/>
 </div>
 </nav>
@@ -94,10 +94,10 @@ const homeMarkup = `
 <h1 class="font-h1 text-h1 text-on-background leading-tight">Master Any Skill with <span class="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">EduFlow</span></h1>
 <p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">Accelerate your career with expertly crafted courses. Join a community of learners dedicated to professional growth in a premium, distraction-free environment.</p>
 <div class="flex gap-md mt-sm">
-<button class="font-label-md text-label-md text-on-primary btn-gradient px-lg py-sm rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-ambient-md h-12 flex items-center justify-center gap-sm">
+<a class="font-label-md text-label-md text-on-primary btn-gradient px-lg py-sm rounded-lg hover:opacity-90 transition-opacity active:scale-95 shadow-ambient-md h-12 flex items-center justify-center gap-sm" href="/register">
                         Get Started
                         <span class="material-symbols-outlined">arrow_forward</span>
-</button>
+</a>
 <button class="font-label-md text-label-md text-on-surface bg-surface border border-outline-variant px-lg py-sm rounded-lg hover:bg-surface-container-low transition-colors active:scale-95 h-12 flex items-center justify-center gap-sm">
 <span class="material-symbols-outlined">play_circle</span>
                         Watch Demo

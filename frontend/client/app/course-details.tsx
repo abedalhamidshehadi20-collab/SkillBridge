@@ -83,8 +83,8 @@ const courseMarkup = `
 </div>
 </div>
 <div class="flex items-center gap-md">
-<button class="font-label-md text-label-md text-primary px-md py-sm rounded border border-outline-variant hover:bg-surface-container transition-colors h-[40px]">Log In</button>
-<button class="font-label-md text-label-md text-on-primary bg-gradient-to-r from-[#6366f1] to-[#4f46e5] px-md py-sm rounded shadow hover:shadow-md transition-all h-[40px]">Get Started</button>
+<a class="font-label-md text-label-md text-primary px-md py-sm rounded border border-outline-variant hover:bg-surface-container transition-colors h-[40px] flex items-center" href="/login">Log In</a>
+<a class="font-label-md text-label-md text-on-primary bg-gradient-to-r from-[#6366f1] to-[#4f46e5] px-md py-sm rounded shadow hover:shadow-md transition-all h-[40px] flex items-center" href="/register">Get Started</a>
 <div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border border-outline-variant ml-sm">
 <img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIgYAjS5yZAD4LlofACwlK-WXaZVSEwypxXMlhKD-44j8_Adr5yg8ov03DMskTFMgsq_1kAZsoNfTIFgB6A2fIJjz8YLx-bhr29Wng2MDRahSF-DnEQLra-qxW2NtohsatOfA0Ne01yJcAbaOmrl2od2Q4-VbQFF5o4d6-Bc1bjosBhIbjUjnLOIY64TNrH5xYCtKqa1Tv5fYDLrwWEUcBSTXaQsiZbajp-aK-Fu_K0_IdqKBe1R--MThtMiia-EyxADgANaq0kKqS"/>
 </div>

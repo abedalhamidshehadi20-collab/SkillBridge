@@ -75,8 +75,8 @@ const marketplaceMarkup = `
 <input class="w-full pl-xl pr-sm py-sm rounded-lg border border-outline-variant bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary outline-none font-body-sm text-body-sm transition-all text-on-surface placeholder:text-on-surface-variant" placeholder="Search for anything..." type="text"/>
 </div>
 <div class="flex items-center gap-md">
-<button class="hidden md:block font-label-md text-label-md text-primary bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm hover:bg-surface-container-low transition-colors active:scale-95 duration-150">Log In</button>
-<button class="primary-gradient-button text-on-primary font-label-md text-label-md rounded-lg px-md py-sm hover:opacity-90 transition-opacity shadow-sm active:scale-95 duration-150">Get Started</button>
+<a class="hidden md:block font-label-md text-label-md text-primary bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm hover:bg-surface-container-low transition-colors active:scale-95 duration-150" href="/login">Log In</a>
+<a class="primary-gradient-button text-on-primary font-label-md text-label-md rounded-lg px-md py-sm hover:opacity-90 transition-opacity shadow-sm active:scale-95 duration-150" href="/register">Get Started</a>
 <img alt="User profile" class="w-10 h-10 rounded-full border border-outline-variant object-cover ml-sm cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgQfQRUD1h3I3K6qFlDOb-3NbrWbc5tXmRwr3k8ufnss220cv7yzcKWJwECOW8kXuHLFmN7Dy7d3QgNHgr4tudb-_9bTIuL9W2I1iQ9yOljEM5A0AjTQYGWd9Kq12GbLTU_paDZZSx0Ch525P-K_q4_QY9ohtNOeyMfwJhZLUBKsforThJbXwQhqCdJfrJrBYvhJHT3VaXJewYs2bnStDspmpM4dAkEvsEazBQVcaBB_teBIB3KBQzoKZZBfW_QtbLZTlbAhrGAgMs"/>
 </div>
 </nav>
@@ -138,7 +138,7 @@ const marketplaceMarkup = `
 </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">
-<article class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+<a class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300" href="/course-details">
 <div class="relative h-48 w-full">
 <img alt="Course Thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR-tqsUWwI7arGg_dd6eMgWQ8gxgFuaUK1RR4gLh_55As_Qb5YmJX3LuggWF-ONAWa0kqjULh46F5DBWZzx3Xd5MhAg98VhpmYBEdXjg5d351ig5xyBlBpGvQUDZ52vuv44y_ZEfUb28j0CAh8eWi9kQOqV0lAJffSqbQjC7ompfUjKWlNT11O23JRT5G9c2x3KEuBFb2QJ8Gtfa_TAcNsy1SCFFRmVD6ScZkaQ7xj3t0JcSejIaO3UVzh0m9nRH0VSUDRHxeYda2O"/>
 <div class="absolute top-sm left-sm bg-primary/10 text-primary font-label-sm text-label-sm px-2 py-1 rounded-full backdrop-blur-sm bg-surface-container-lowest/80 border border-primary/20">Best Seller</div>
@@ -165,8 +165,8 @@ const marketplaceMarkup = `
 </div>
 </div>
 </div>
-</article>
-<article class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+</a>
+<a class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300" href="/course-details">
 <div class="relative h-48 w-full">
 <img alt="Course Thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMIKMpXimGfz-riRw3hkKMSLrdJUXR5_CGXc2yIZzFPLukvcJOMAtj6CUuBUqgNx9NVMgyNMrdsVY1rhG-P1PlSavmbDooJlfz8t4Y5DYVVC1LgxwCMflOU7hJIqpuVlzie6ByxDqAQEzvwPyQIqH-jM54DxsahhOhTKD2EVmtpFPeBkA0-lxCXwxL-QyBjQSLkeMUvVr-DzVFFe3ITbgW64sGxqVVQVZpBBBlWgbzarSobsN5r05L9FVP15bfOLzgBp5UhKRVlqZb"/>
 </div>
@@ -192,8 +192,8 @@ const marketplaceMarkup = `
 </div>
 </div>
 </div>
-</article>
-<article class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+</a>
+<a class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300" href="/course-details">
 <div class="relative h-48 w-full">
 <img alt="Course Thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDpoR5Bry0ePcaQLohG6hdjwUQWjWPWNtnqbo2jL8t4bxE6pRd_ZYT2v0kHRaNHlrFweV_wqvPB7jKsw8nOV46aSzRnZ-3rPt0rlJzW26tXtKHHkNrJ5fiDMesg1sCGyNT75xR065YBiLAzTD3IuvNBe3utgf6uroAkcEytaxVkUbsa2zzymtEZ4T932weEmsM6zU6DMrAA6yNgJ5BYDQY6-z6MXCDaGoOieITa4GwIhB5Cma6OibrNzQ6vH9RJxR8G61Ux8EoFV89"/>
 <div class="absolute top-sm left-sm bg-primary/10 text-primary font-label-sm text-label-sm px-2 py-1 rounded-full backdrop-blur-sm bg-surface-container-lowest/80 border border-primary/20">New</div>
@@ -220,8 +220,8 @@ const marketplaceMarkup = `
 </div>
 </div>
 </div>
-</article>
-<article class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
+</a>
+<a class="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant ambient-shadow-card flex flex-col group cursor-pointer hover:-translate-y-1 transition-transform duration-300" href="/course-details">
 <div class="relative h-48 w-full">
 <img alt="Course Thumbnail" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0e5e58-2rTQV68h3R9iInEAWIUOpUXFQNvu5XW68IDvYGy7wT65wucl6zgPcZ7RU5_h8J-wgSl0Nn0CFreKENAlgooq5G7v0y1dICzazdxTVfzasssod7KjzTJX4Ds7Bnh7msjtOMWvKnGOwEs34ejjxwVc5CTD98Vtauf3zhdiYRWLg-Yls2zWfAKkulI5TfPmlOTUArVObrd5HdKW4MVIDSGWFQyOu-VPM9abYPHmbpezIuk_ASwz5vopph6amDUc8dHh3iR4YW"/>
 </div>
@@ -247,7 +247,7 @@ const marketplaceMarkup = `
 </div>
 </div>
 </div>
-</article>
+</a>
 </div>
 <div class="mt-xl flex justify-center gap-sm">
 <button class="w-10 h-10 rounded-lg border border-outline-variant bg-surface-container-lowest flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
