@@ -8,6 +8,7 @@ import type { User } from '@supabase/supabase-js';
 
 export default function NavAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -16,15 +17,33 @@ export default function NavAuth() {
   useEffect(() => {
     const supabase = createClient();
 
-    // Initial session check
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
+    async function init() {
+      const { data } = await supabase.auth.getUser();
+      const u = data.user ?? null;
+      setUser(u);
+
+      if (u) {
+        // Check admin role in profiles table
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', u.id)
+          .single();
+
+        setIsAdmin(
+          profile?.role === 'admin' || u.user_metadata?.is_admin === true
+        );
+      }
+
       setLoading(false);
-    });
+    }
+
+    init();
 
     // Keep in sync with auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) setIsAdmin(false);
     });
 
     return () => subscription.unsubscribe();
@@ -72,9 +91,12 @@ export default function NavAuth() {
   const email = user.email ?? '';
   const avatarUrl = user.user_metadata?.avatar_url as string | undefined;
 
+  // Admin goes to /admin, regular users go to /dashboard
+  const dashboardHref = isAdmin ? '/admin' : '/dashboard';
+
   return (
     <div ref={dropdownRef} className="relative">
-      {/* Trigger card — matches reference image */}
+      {/* Trigger card */}
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2.5 rounded-full border border-[#dde3f0] bg-white px-3 py-1.5 shadow-sm hover:shadow-md transition-shadow duration-150 cursor-pointer"
@@ -96,9 +118,16 @@ export default function NavAuth() {
 
         {/* Name + email */}
         <div className="text-left hidden sm:block">
-          <p className="text-[13px] font-semibold text-[#1a1f2e] leading-tight whitespace-nowrap max-w-[140px] truncate">
-            {fullName}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[13px] font-semibold text-[#1a1f2e] leading-tight whitespace-nowrap max-w-[130px] truncate">
+              {fullName}
+            </p>
+            {isAdmin && (
+              <span className="text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full leading-none">
+                ADMIN
+              </span>
+            )}
+          </div>
           <p className="text-[11px] text-[#7b82a0] leading-tight whitespace-nowrap max-w-[140px] truncate">
             {email}
           </p>
@@ -116,13 +145,25 @@ export default function NavAuth() {
       {open && (
         <div className="absolute right-0 mt-2 w-52 rounded-xl border border-[#dde3f0] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)] py-1.5 z-50 animate-[fade-slide-down_0.15s_ease]">
           <Link
-            href="/dashboard"
+            href={dashboardHref}
             onClick={() => setOpen(false)}
             className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium text-[#1a1f2e] hover:bg-[#f4f6fb] transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px] text-[#6b7280]">dashboard</span>
-            Dashboard
+            <span className="material-symbols-outlined text-[18px] text-[#6b7280]">
+              {isAdmin ? 'admin_panel_settings' : 'dashboard'}
+            </span>
+            {isAdmin ? 'Admin Dashboard' : 'Dashboard'}
           </Link>
+          {isAdmin && (
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] font-medium text-[#1a1f2e] hover:bg-[#f4f6fb] transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px] text-[#6b7280]">dashboard</span>
+              User Dashboard
+            </Link>
+          )}
           <Link
             href="/profile"
             onClick={() => setOpen(false)}

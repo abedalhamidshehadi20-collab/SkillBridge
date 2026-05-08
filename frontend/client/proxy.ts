@@ -8,8 +8,8 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Only protect /dashboard routes — everything else is public
-  if (pathname.startsWith('/dashboard')) {
+  // Only protect /dashboard and /admin routes — everything else is public
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
     // Read session from the (possibly refreshed) cookies
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
